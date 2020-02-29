@@ -67,7 +67,7 @@ contract VoteProposalPool {
         VoteProposal proposal = new VoteProposal(_deadline, _name, _data);
         proposal.createOptions(_deadline, _name);
         emit newProposalIssued(
-            proposal,
+            address(proposal),
             msg.sender,
             _deadline,
             _name,
