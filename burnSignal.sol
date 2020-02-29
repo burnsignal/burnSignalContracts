@@ -3,11 +3,11 @@ pragma solidity ^0.5.0;
 contract VoteOption {
     VoteProposal creator;
     address owner;
-    uint deadline;
+    uint32 deadline;
     string name;
     string option;
 
-    constructor(uint _deadline, string memory _name, string memory _option) public {
+    constructor(uint32 _deadline, string memory _name, string memory _option) public {
         owner = msg.sender;
         creator = VoteProposal(msg.sender);
         deadline = _deadline;
@@ -25,13 +25,13 @@ contract VoteOption {
 contract VoteProposal {
     VoteProposalPool creator;
     address owner;
-    uint deadline;
+    uint32 deadline;
     string name;
     string data;
 
     mapping(uint => address) public options;
 
-    constructor(uint _deadline, string memory _name, string memory _data) public {
+    constructor(uint32 _deadline, string memory _name, string memory _data) public {
         owner = msg.sender;
         creator = VoteProposalPool(msg.sender);
         deadline = _deadline;
@@ -39,7 +39,7 @@ contract VoteProposal {
         data = _data;
     }
 
-    function createOptions(uint _deadline, string calldata _name)
+    function createOptions(uint32 _deadline, string calldata _name)
         external
         returns (VoteOption yes, VoteOption no)
     {
@@ -55,7 +55,7 @@ contract VoteProposalPool {
     function newVoteProposal(
         string calldata _name,
         string calldata _data,
-        uint64 _deadline
+        uint32 _deadline
     )
         external
         validateDeadline(_deadline)
@@ -76,7 +76,7 @@ contract VoteProposalPool {
     }
 
 
-    modifier validateDeadline(uint _newDeadline) {
+    modifier validateDeadline(uint32 _newDeadline) {
       require(_newDeadline > now);
       _;
     }
@@ -84,7 +84,7 @@ contract VoteProposalPool {
     event newProposalIssued(
         address proposal,
         address issuer,
-        uint deadline,
+        uint32 deadline,
         string name,
         string data,
         string optionA,
