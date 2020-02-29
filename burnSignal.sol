@@ -59,6 +59,8 @@ contract VoteProposalPool {
     )
         external
         validateDeadline(_deadline)
+        validateName(_name)
+        validateDescription(_data)
         returns (VoteProposal newProposal)
     {
         newProposal = new VoteProposal(_deadline, _name, _data);
@@ -79,6 +81,19 @@ contract VoteProposalPool {
     modifier validateDeadline(uint32 _deadline) {
         require(_deadline > (now + 604800), "Deadline must be at least one week from now");
         require(_deadline < (now + 31622400), "Deadline must be no more than one year from now");
+        _;
+    }
+
+    modifier validateName(string memory _name) {
+        bytes memory nameBytes = bytes(_name);
+        require(nameBytes.length < 32, "Proposal name must be less than 32 characters (ASCII)");
+        require(nameBytes.length >= 4, "Proposal name at least 4 characters (ASCII)");
+        _;
+    }
+
+    modifier validateDescription(string memory _description) {
+        bytes memory descriptionBytes = bytes(_description);
+        require(descriptionBytes.length < 256, "Proposal description must be less than 256 characters (ASCII)");
         _;
     }
 
