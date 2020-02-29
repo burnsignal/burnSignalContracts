@@ -3,7 +3,6 @@ pragma solidity ^0.5.0;
 contract VoteOption {
     VoteProposal creator;
     address owner;
-    address voteOptionAddress;
     uint deadline;
     string name;
     string option;
@@ -11,7 +10,6 @@ contract VoteOption {
     constructor(uint _deadline, string memory _name, string memory _option) public {
         owner = msg.sender;
         creator = VoteProposal(msg.sender);
-        voteOptionAddress = address(this);
         deadline = _deadline;
         name = _name;
         option = _option;
@@ -20,7 +18,7 @@ contract VoteOption {
     event AnonymousDeposit(address indexed from, uint value, string name, string option);
 
     function () external payable {
-		emit AnonymousDeposit(msg.sender, msg.value, name, option);
+	    emit AnonymousDeposit(msg.sender, msg.value, name, option);
     }
 }
 
@@ -43,13 +41,12 @@ contract VoteProposal {
 
     function createOptions(uint _deadline, string calldata _name)
         external
-        returns (VoteOption newVoteOptionA, VoteOption newVoteOptionB)
+        returns (VoteOption yes, VoteOption no)
     {
-        VoteOption yes = new VoteOption(_deadline, _name, "yes");
-        VoteOption no = new VoteOption(_deadline, _name, "no");
+        yes = new VoteOption(_deadline, _name, "yes");
+        no = new VoteOption(_deadline, _name, "no");
         options[0] = address(yes);
         options[1] = address(no);
-        return (yes, no);
     }
 }
 
@@ -64,19 +61,18 @@ contract VoteProposalPool {
         validateDeadline(_deadline)
         returns (VoteProposal newProposal)
     {
-        VoteProposal proposal = new VoteProposal(_deadline, _name, _data);
-        proposal.createOptions(_deadline, _name);
+        newProposal = new VoteProposal(_deadline, _name, _data);
+        newProposal.createOptions(_deadline, _name);
         emit newProposalIssued(
-            address(proposal),
+            address(newProposal),
             msg.sender,
             _deadline,
             _name,
             _data,
             "yes",
-            proposal.options(0),
+            newProposal.options(0),
             "no",
-            proposal.options(1));
-        return (proposal);
+            newProposal.options(1));
     }
 
 
