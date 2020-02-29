@@ -76,9 +76,10 @@ contract VoteProposalPool {
     }
 
 
-    modifier validateDeadline(uint32 _newDeadline) {
-      require(_newDeadline > now);
-      _;
+    modifier validateDeadline(uint32 _deadline) {
+        require(_deadline > (now + 604800), "Deadline must be at least one week from now");
+        require(_deadline < (now + 31622400), "Deadline must be no more than one year from now");
+        _;
     }
 
     event newProposalIssued(
