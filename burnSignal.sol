@@ -17,7 +17,7 @@ contract VoteOption {
 
     event AnonymousDeposit(address indexed from, uint value, string name, string option);
 
-    function () external payable {
+    receive() external payable {
 	    emit AnonymousDeposit(msg.sender, msg.value, name, option);
     }
 }
