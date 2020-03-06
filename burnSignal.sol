@@ -1,17 +1,15 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 contract VoteOption {
     VoteProposal creator;
     address owner;
-    address voteOptionAddress;
-    uint deadline;
+    uint32 deadline;
     string name;
     string option;
 
-    constructor(uint _deadline, string memory _name, string memory _option) public {
+    constructor(uint32 _deadline, string memory _name, string memory _option) public {
         owner = msg.sender;
         creator = VoteProposal(msg.sender);
-        voteOptionAddress = address(this);
         deadline = _deadline;
         name = _name;
         option = _option;
@@ -19,21 +17,21 @@ contract VoteOption {
 
     event AnonymousDeposit(address indexed from, uint value, string name, string option);
 
-    function () external payable {
-		emit AnonymousDeposit(msg.sender, msg.value, name, option);
+    receive() external payable {
+	    emit AnonymousDeposit(msg.sender, msg.value, name, option);
     }
 }
 
 contract VoteProposal {
     VoteProposalPool creator;
     address owner;
-    uint deadline;
+    uint32 deadline;
     string name;
     string data;
 
     mapping(uint => address) public options;
 
-    constructor(uint _deadline, string memory _name, string memory _data) public {
+    constructor(uint32 _deadline, string memory _name, string memory _data) public {
         owner = msg.sender;
         creator = VoteProposalPool(msg.sender);
         deadline = _deadline;
@@ -41,15 +39,14 @@ contract VoteProposal {
         data = _data;
     }
 
-    function createOptions(uint _deadline, string calldata _name)
+    function createOptions(uint32 _deadline, string calldata _name)
         external
-        returns (VoteOption newVoteOptionA, VoteOption newVoteOptionB)
+        returns (VoteOption yes, VoteOption no)
     {
-        VoteOption yes = new VoteOption(_deadline, _name, "yes");
-        VoteOption no = new VoteOption(_deadline, _name, "no");
+        yes = new VoteOption(_deadline, _name, "yes");
+        no = new VoteOption(_deadline, _name, "no");
         options[0] = address(yes);
         options[1] = address(no);
-        return (yes, no);
     }
 }
 
@@ -58,37 +55,52 @@ contract VoteProposalPool {
     function newVoteProposal(
         string calldata _name,
         string calldata _data,
-        uint64 _deadline
+        uint32 _deadline
     )
         external
         validateDeadline(_deadline)
+        validateName(_name)
+        validateDescription(_data)
         returns (VoteProposal newProposal)
     {
-        VoteProposal proposal = new VoteProposal(_deadline, _name, _data);
-        proposal.createOptions(_deadline, _name);
+        newProposal = new VoteProposal(_deadline, _name, _data);
+        newProposal.createOptions(_deadline, _name);
         emit newProposalIssued(
-            proposal,
+            address(newProposal),
             msg.sender,
             _deadline,
             _name,
             _data,
             "yes",
-            proposal.options(0),
+            newProposal.options(0),
             "no",
-            proposal.options(1));
-        return (proposal);
+            newProposal.options(1));
     }
 
 
-    modifier validateDeadline(uint _newDeadline) {
-      require(_newDeadline > now);
-      _;
+    modifier validateDeadline(uint32 _deadline) {
+        require(_deadline > (now + 604800), "Deadline must be at least one week from now");
+        require(_deadline < (now + 31622400), "Deadline must be no more than one year from now");
+        _;
+    }
+
+    modifier validateName(string memory _name) {
+        bytes memory nameBytes = bytes(_name);
+        require(nameBytes.length < 32, "Proposal name must be less than 32 characters (ASCII)");
+        require(nameBytes.length >= 4, "Proposal name at least 4 characters (ASCII)");
+        _;
+    }
+
+    modifier validateDescription(string memory _description) {
+        bytes memory descriptionBytes = bytes(_description);
+        require(descriptionBytes.length < 256, "Proposal description must be less than 256 characters (ASCII)");
+        _;
     }
 
     event newProposalIssued(
         address proposal,
         address issuer,
-        uint deadline,
+        uint32 deadline,
         string name,
         string data,
         string optionA,
