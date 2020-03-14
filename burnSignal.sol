@@ -93,7 +93,7 @@ contract VoteProposalPool {
     
     modifier validateDescription(string memory _description) {
         bytes memory descriptionBytes = bytes(_description);
-        require(descriptionBytes.length <= 1000, "Proposal description must be less than 1,0000 characters (ASCII)");
+        require(descriptionBytes.length <= 1000, "Proposal description must be less than 1,000 characters (ASCII)");
         _;
     }
 
