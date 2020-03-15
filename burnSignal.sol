@@ -65,7 +65,7 @@ contract VoteProposalPool {
     )
         external
         validateDeadline(_deadline)
-	validateDescription(_data)
+	    validateDescription(_data)
         validateName(_name)
         returns (VoteProposal newProposal)
     {
