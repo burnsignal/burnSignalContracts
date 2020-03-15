@@ -6,6 +6,7 @@ contract VoteOption {
     uint32 deadline;
     string name;
     string option;
+    address burnAddress;
 
     constructor(uint32 _deadline, string memory _name, string memory _option) public {
         owner = msg.sender;
@@ -13,12 +14,17 @@ contract VoteOption {
         deadline = _deadline;
         name = _name;
         option = _option;
+        burnAddress = 0x0000000000000000000000000000000000000000;
     }
 
-    event AnonymousDeposit(address indexed from, uint value, string name, string option);
+    event ReceivedDeposit(address indexed from, uint value, string name, string option);
+    event BurnedDeposit(address indexed from, address indexed burnAddress, uint value);
 
     function() external payable {
-	    emit AnonymousDeposit(msg.sender, msg.value, name, option);
+	    emit ReceivedDeposit(msg.sender, msg.value, name, option);
+        (bool success, ) = burnAddress.call.value(msg.value)("");
+        require(success, "Failed to forward to burn address");
+        emit BurnedDeposit(msg.sender, burnAddress, msg.value);
     }
 }
 
@@ -86,11 +92,11 @@ contract VoteProposalPool {
 
     modifier validateName(string memory _name) {
         bytes memory nameBytes = bytes(_name);
-        require(nameBytes.length <= 100, "Proposal name must be less than 280 characters (ASCII)");
+        require(nameBytes.length <= 100, "Proposal name must be less than 100 characters (ASCII)");
         require(nameBytes.length >= 4, "Proposal name at least 4 characters (ASCII)");
         _;
     }
-    
+
     modifier validateDescription(string memory _description) {
         bytes memory descriptionBytes = bytes(_description);
         require(descriptionBytes.length <= 1000, "Proposal description must be less than 1,000 characters (ASCII)");
