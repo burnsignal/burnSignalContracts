@@ -92,11 +92,11 @@ contract VoteProposalPool {
 
     modifier validateName(string memory _name) {
         bytes memory nameBytes = bytes(_name);
-        require(nameBytes.length <= 100, "Proposal name must be less than 280 characters (ASCII)");
+        require(nameBytes.length <= 100, "Proposal name must be less than 100 characters (ASCII)");
         require(nameBytes.length >= 4, "Proposal name at least 4 characters (ASCII)");
         _;
     }
-    
+
     modifier validateDescription(string memory _description) {
         bytes memory descriptionBytes = bytes(_description);
         require(descriptionBytes.length <= 1000, "Proposal description must be less than 1,000 characters (ASCII)");
