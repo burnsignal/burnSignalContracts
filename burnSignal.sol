@@ -20,6 +20,8 @@ contract VoteOption {
     event ReceivedDeposit(address indexed from, uint value, string name, string option);
     event BurnedDeposit(address indexed from, address indexed burnAddress, uint value);
 
+    // TODO: Change to `receive() external payable` fallback once
+    // solc functions > 0.6 are supported by The Graph
     function() external payable {
 	    emit ReceivedDeposit(msg.sender, msg.value, name, option);
         (bool success, ) = burnAddress.call.value(msg.value)("");
