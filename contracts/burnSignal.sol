@@ -59,6 +59,13 @@ contract VoteProposal {
 }
 
 contract VoteProposalPool {
+    bool private initialized;
+
+    function initialize() public {
+        require(!initialized);
+        initialized = true;
+        emit proposalPoolCreated(address(this));
+    }
 
     function newVoteProposal(
         string calldata _name,
@@ -104,6 +111,10 @@ contract VoteProposalPool {
         require(descriptionBytes.length <= 1000, "Proposal description must be less than 1,000 characters (ASCII)");
         _;
     }
+
+    event proposalPoolCreated(
+        address poolAddress
+    );
 
     event newProposalIssued(
         address proposal,
